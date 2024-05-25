@@ -1,7 +1,11 @@
 { pkgs ? import <nixpkgs> }:
-pkgs.stdenv.mkDerifation {
-  name = "touchpadctrl";
-  src = "src";
+pkgs.stdenv.mkDerivation {
+  name = "touchpadctl";
+  src = ./src;
+
+  buildInputs = with pkgs; [
+    ghc
+  ];
 
   buildPhase = ''
     ghc touchpadctl.hs -o touchpadctl
@@ -9,6 +13,6 @@ pkgs.stdenv.mkDerifation {
 
   installPhase = ''
     mkdir -p $out/bin
-    cp $src/touchpadctrl $out/bin
+    cp touchpadctl $out/bin
   '';
 }
