@@ -53,6 +53,8 @@ barstatus file enabledSymbol disabledSymbol = do
             Enabled -> enabledSymbol
             Disabled -> disabledSymbol
         )
+    print state
+    print state
 
 main = do
     args <- getArgs
