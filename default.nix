@@ -14,5 +14,6 @@ pkgs.stdenv.mkDerivation {
   installPhase = ''
     mkdir -p $out/bin
     cp touchpadctl $out/bin
+    cp symbols $out/bin
   '';
 }

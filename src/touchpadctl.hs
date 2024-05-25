@@ -45,6 +45,15 @@ toggle file = do
         Enabled -> setTouchpadState file Disabled
         Disabled -> setTouchpadState file Enabled
 
+barstatus :: FilePath -> IO ()
+barstatus file = do
+    state <- getState file
+    symbols <- readFile "symbols"
+    putStrLn (case state of
+        Enabled -> [head symbols]
+        Disabled -> [symbols !! 2]
+        )
+
 main = do
     args <- getArgs
     file <- touchpadStateFile
@@ -53,4 +62,8 @@ main = do
         ["enable"] -> setTouchpadState file Enabled
         ["disable"] -> setTouchpadState file Disabled
         ["toggle"] -> toggle file
-        _ -> error "command line arg must be one of `enable`, `disable` or `toggle`"
+        ["status"] -> do
+            state <- getState file
+            print state
+        ["barstatus"] -> barstatus file
+        _ -> error "command line arg must be one of `enable`, `disable`, `toggle`, `status` or `barstatus`"
