@@ -4,10 +4,13 @@
 import System.Environment (lookupEnv, setEnv, getArgs)
 import System.Exit (exitFailure)
 import System.Process (callCommand)
+import System.Directory (getHomeDirectory)
 import Text.Read (readMaybe)
 
-touchpadStateFile :: String
-touchpadStateFile = "/home/matz/.touchpad_state"
+touchpadStateFile :: IO String
+touchpadStateFile = do
+    home <- getHomeDirectory 
+    return (home ++ "/.touchpad_state")
 
 data State = Enabled | Disabled deriving (Show, Read)
 
@@ -16,8 +19,8 @@ abort msg = do
     putStrLn msg
     exitFailure
 
-setTouchpadState :: State -> IO ()
-setTouchpadState targetState =
+setTouchpadState :: FilePath -> State -> IO ()
+setTouchpadState file targetState =
     let
         stateString :: State -> String
         stateString Enabled = "true"
@@ -26,27 +29,28 @@ setTouchpadState targetState =
         do
             putStrLn ("set touchpad-enabled to " ++ stateString targetState)
             callCommand ("hyprctl keyword device[bcm5974]:enabled " ++ stateString targetState)
-            writeFile touchpadStateFile (show targetState)
+            writeFile file (show targetState)
 
-getState :: IO State
-getState = do
-    content <- readFile touchpadStateFile
+getState :: FilePath -> IO State
+getState file = do
+    content <- readFile file
     case readMaybe content :: Maybe State of
         Just value -> return value
-        Nothing -> error ("File `" ++ touchpadStateFile ++ "` contains an invalid value")
+        Nothing -> error ("File `" ++ file ++ "` contains an invalid value")
 
-toggle :: IO ()
-toggle = do
-    state <- getState
+toggle :: FilePath -> IO ()
+toggle file = do
+    state <- getState file
     case state of
-        Enabled -> setTouchpadState Disabled
-        Disabled -> setTouchpadState Enabled
+        Enabled -> setTouchpadState file Disabled
+        Disabled -> setTouchpadState file Enabled
 
 main = do
     args <- getArgs
+    file <- touchpadStateFile
 
     case args of
-        ["enable"] -> setTouchpadState Enabled
-        ["disable"] -> setTouchpadState Disabled
-        ["toggle"] -> toggle
+        ["enable"] -> setTouchpadState file Enabled
+        ["disable"] -> setTouchpadState file Disabled
+        ["toggle"] -> toggle file
         _ -> error "command line arg must be one of `enable`, `disable` or `toggle`"
