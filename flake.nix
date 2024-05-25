@@ -16,5 +16,7 @@
         ];
         shellHook = "fish; exit";
       };
+
+      packages.${system}.default = (import ./default.nix { inherit pkgs; });
     };
 }
