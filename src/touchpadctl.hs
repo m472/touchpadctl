@@ -51,7 +51,7 @@ barstatus symbols file = do
     putStrLn
         ( case state of
             Enabled -> [head symbols]
-            Disabled -> [symbols !! 2]
+            Disabled -> [symbols !! 1]
         )
 
 main = do
