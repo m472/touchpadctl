@@ -1,15 +1,15 @@
 #!/usr/bin/env nix-shell
 #!nix-shell --pure -i runghc -p "haskellPackages.ghcWithPackages (pkgs: [])"
 
-import System.Environment (lookupEnv, setEnv, getArgs)
+import System.Directory (getHomeDirectory)
+import System.Environment (getArgs, lookupEnv, setEnv)
 import System.Exit (exitFailure)
 import System.Process (callCommand)
-import System.Directory (getHomeDirectory)
 import Text.Read (readMaybe)
 
 touchpadStateFile :: IO String
 touchpadStateFile = do
-    home <- getHomeDirectory 
+    home <- getHomeDirectory
     return (home ++ "/.touchpad_state")
 
 data State = Enabled | Disabled deriving (Show, Read)
@@ -45,13 +45,13 @@ toggle file = do
         Enabled -> setTouchpadState file Disabled
         Disabled -> setTouchpadState file Enabled
 
-barstatus :: FilePath -> IO ()
-barstatus file = do
+barstatus :: String -> FilePath -> IO ()
+barstatus symbols file = do
     state <- getState file
-    symbols <- readFile "symbols"
-    putStrLn (case state of
-        Enabled -> [head symbols]
-        Disabled -> [symbols !! 2]
+    putStrLn
+        ( case state of
+            Enabled -> [head symbols]
+            Disabled -> [symbols !! 2]
         )
 
 main = do
@@ -65,5 +65,5 @@ main = do
         ["status"] -> do
             state <- getState file
             print state
-        ["barstatus"] -> barstatus file
+        ["barstatus", symbols] -> barstatus symbols file
         _ -> error "command line arg must be one of `enable`, `disable`, `toggle`, `status` or `barstatus`"
