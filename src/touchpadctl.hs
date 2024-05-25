@@ -45,13 +45,13 @@ toggle file = do
         Enabled -> setTouchpadState file Disabled
         Disabled -> setTouchpadState file Enabled
 
-barstatus :: String -> FilePath -> IO ()
-barstatus symbols file = do
+barstatus :: FilePath -> String -> String -> IO ()
+barstatus file enabledSymbol disabledSymbol = do
     state <- getState file
     putStrLn
         ( case state of
-            Enabled -> [head symbols]
-            Disabled -> [symbols !! 1]
+            Enabled -> enabledSymbol
+            Disabled -> disabledSymbol
         )
 
 main = do
@@ -65,5 +65,5 @@ main = do
         ["status"] -> do
             state <- getState file
             print state
-        ["barstatus", symbols] -> barstatus symbols file
+        ["barstatus", enabled, disabled] -> barstatus file enabled disabled
         _ -> error "command line arg must be one of `enable`, `disable`, `toggle`, `status` or `barstatus`"
