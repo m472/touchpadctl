@@ -25,10 +25,12 @@ setTouchpadState file targetState =
         stateString :: State -> String
         stateString Enabled = "true"
         stateString Disabled = "false"
+        hyprCtlCmd = "hyprctl keyword device[bcm5974]:enabled " ++ stateString targetState 
+        notifyCmd = "notify-send \"Touchpad " ++ show targetState ++ "\""
      in
         do
             putStrLn ("set touchpad-enabled to " ++ stateString targetState)
-            callCommand ("hyprctl keyword device[bcm5974]:enabled " ++ stateString targetState)
+            callCommand (unwords [hyprCtlCmd, "&&", notifyCmd])
             writeFile file (show targetState)
 
 getState :: FilePath -> IO State
@@ -48,12 +50,17 @@ toggle file = do
 barstatus :: FilePath -> String -> String -> IO ()
 barstatus file enabledSymbol disabledSymbol = do
     state <- getState file
+    -- print text for {} in waybar
     putStrLn
         ( case state of
             Enabled -> enabledSymbol
             Disabled -> disabledSymbol
         )
+
+    -- print state for tooltip
     print state
+
+    -- print state for waybar class
     print state
 
 main = do

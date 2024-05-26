@@ -7,6 +7,10 @@ pkgs.stdenv.mkDerivation {
     ghc
   ];
 
+  nativeBuildInputs = with pkgs; [
+    makeWrapper
+  ];
+
   buildPhase = ''
     ghc touchpadctl.hs -o touchpadctl
   '';
@@ -14,5 +18,12 @@ pkgs.stdenv.mkDerivation {
   installPhase = ''
     mkdir -p $out/bin
     cp touchpadctl $out/bin
+  '';
+
+  postFixup = ''
+    wrapProgram $out/bin/touchpadctl \
+      --set PATH ${pkgs.lib.makeBinPath (with pkgs; [
+        libnotify
+      ])}
   '';
 }
