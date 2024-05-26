@@ -24,6 +24,7 @@ pkgs.stdenv.mkDerivation {
     wrapProgram $out/bin/touchpadctl \
       --set PATH ${pkgs.lib.makeBinPath (with pkgs; [
         libnotify
+        hyprland
       ])}
   '';
 }
