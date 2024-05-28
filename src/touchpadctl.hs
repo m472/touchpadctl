@@ -69,9 +69,9 @@ main = do
     file <- touchpadStateFile
 
     case args of
-        ["enable", "--device", id] -> setTouchpadState file (Device id) Enabled
-        ["disable", "--device", id] -> setTouchpadState file (Device id) Disabled
-        ["toggle", "--device", id] -> toggle file (Device id)
+        ["enable", id] -> setTouchpadState file (Device id) Enabled
+        ["disable", id] -> setTouchpadState file (Device id) Disabled
+        ["toggle", id] -> toggle file (Device id)
         ["status"] -> do
             state <- getState file
             print state
