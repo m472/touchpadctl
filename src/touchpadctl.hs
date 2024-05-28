@@ -13,19 +13,20 @@ touchpadStateFile = do
     return (home ++ "/.touchpad_state")
 
 data State = Enabled | Disabled deriving (Show, Read)
+newtype Device = Device String
 
 abort :: String -> IO ()
 abort msg = do
     putStrLn msg
     exitFailure
 
-setTouchpadState :: FilePath -> State -> IO ()
-setTouchpadState file targetState =
+setTouchpadState :: FilePath -> Device -> State -> IO ()
+setTouchpadState file (Device id) targetState =
     let
         stateString :: State -> String
         stateString Enabled = "true"
         stateString Disabled = "false"
-        hyprCtlCmd = "hyprctl keyword device[bcm5974]:enabled " ++ stateString targetState 
+        hyprCtlCmd = "hyprctl keyword device[" ++ id ++ "]:enabled " ++ stateString targetState
         notifyCmd = "notify-send \"Touchpad " ++ show targetState ++ "\""
      in
         do
@@ -40,12 +41,12 @@ getState file = do
         Just value -> return value
         Nothing -> error ("File `" ++ file ++ "` contains an invalid value")
 
-toggle :: FilePath -> IO ()
-toggle file = do
+toggle :: FilePath -> Device -> IO ()
+toggle file device = do
     state <- getState file
     case state of
-        Enabled -> setTouchpadState file Disabled
-        Disabled -> setTouchpadState file Enabled
+        Enabled -> setTouchpadState file device Disabled
+        Disabled -> setTouchpadState file device Enabled
 
 barstatus :: FilePath -> String -> String -> IO ()
 barstatus file enabledSymbol disabledSymbol = do
@@ -68,9 +69,9 @@ main = do
     file <- touchpadStateFile
 
     case args of
-        ["enable"] -> setTouchpadState file Enabled
-        ["disable"] -> setTouchpadState file Disabled
-        ["toggle"] -> toggle file
+        ["enable", "--device", id] -> setTouchpadState file (Device id) Enabled
+        ["disable", "--device", id] -> setTouchpadState file (Device id) Disabled
+        ["toggle", "--device", id] -> toggle file (Device id)
         ["status"] -> do
             state <- getState file
             print state
